@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ARX PREMIUM V5 - FINAL FIXED</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script id="monetag-sdk"></script>
+
+    <style>
+        :root { --primary: #00fbff; --accent: #ff0055; --bg: #0d1117; --card-bg: #161b22; --success: #00ff88; }
+        @keyframes borderGlow { 0% { border-color: var(--accent); box-shadow: 0 0 5px var(--accent); } 50% { border-color: var(--primary); box-shadow: 0 0 15px var(--primary); } 100% { border-color: #ffea00; box-shadow: 0 0 5px #ffea00; } }
+        @keyframes rainbow { 0% { color: #ff0000; } 25% { color: #00ff00; } 50% { color: #0000ff; } 75% { color: #ffff00; } 100% { color: #ff00ff; } }
+        
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { margin: 0; font-family: 'Segoe UI', sans-serif; background: var(--bg); color: #fff; overflow-x: hidden; }
+
+        .modal-overlay { display: flex; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 10000; justify-content: center; align-items: center; padding: 20px; }
+        .setup-card { background: var(--card-bg); border: 2px solid var(--primary); border-radius: 20px; padding: 25px; text-align: center; width: 100%; max-width: 350px; animation: borderGlow 4s infinite alternate; }
+        
+        .header-container { padding: 15px; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+        .name-box { width: 100%; max-width: 400px; padding: 15px; border: 2px solid; border-radius: 15px; text-align: center; font-size: 20px; font-weight: bold; animation: borderGlow 3s infinite alternate; }
+        .time-box { padding: 8px 25px; border-radius: 50px; background: rgba(0,0,0,0.5); font-weight: bold; animation: rainbow 5s infinite; }
+
+        .post-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 10px; }
+        .post-box { border: 1px solid; border-radius: 10px; padding: 5px; background: rgba(255,255,255,0.05); text-align: center; animation: borderGlow 6s infinite alternate; }
+        .post-box img { width: 100%; height: 85px; object-fit: cover; border-radius: 8px; cursor: pointer; }
+
+        .dl-btn { width: 100%; padding: 10px; border: none; border-radius: 8px; background: linear-gradient(45deg, #00dbde, #fc00ff); color: #fff; font-weight: bold; cursor: pointer; margin-top: 5px; font-size: 11px; }
+
+        #admin-panel { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 15000; overflow-y: auto; padding: 60px 15px; }
+        .sidebar { position: fixed; top: 0; left: -280px; width: 260px; height: 100%; background: #0b0e14; transition: 0.4s; padding: 80px 20px; z-index: 16000; border-right: 2px solid var(--primary); }
+        .sidebar.active { left: 0; }
+        .sidebar-item { padding: 15px; margin-bottom: 12px; background: #1c1f26; border-radius: 12px; border-left: 5px solid var(--primary); cursor: pointer; font-weight: bold; }
+        
+        input { width: 100%; padding: 12px; margin: 8px 0; border-radius: 10px; border: 1px solid #333; background: #000; color: #fff; }
+        .zone-display { background: #000; padding: 12px; border-radius: 10px; color: var(--success); font-family: monospace; margin: 10px 0; border: 1px dashed #444; }
+
+        #image-viewer { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.98); z-index: 30000; flex-direction: column; justify-content: center; align-items: center; }
+        #image-viewer img { max-width: 90%; max-height: 70%; border: 2px solid var(--primary); }
+    </style>
+</head>
+<body>
+
+    <div class="header-container">
+        <div class="name-box">ARX PREMIUM STORE</div>
+        <div class="time-box" id="live-clock">00:00:00 AM</div>
+    </div>
+
+    <div id="reg-box" class="modal-overlay" style="display: none;">
+        <div class="setup-card">
+            <h2 style="color:var(--primary)">USER LOGIN</h2>
+            <input type="text" id="reg-user" placeholder="Username (no @)">
+            <input type="number" id="reg-id" placeholder="Telegram User ID">
+            <button class="dl-btn" style="padding:15px;" onclick="registerUser()">Login Now</button>
+        </div>
+    </div>
+
+    <div id="notice-box" class="modal-overlay" style="display: none;">
+        <div class="setup-card" style="max-width: 420px; text-align: left; border: 2px solid var(--primary); background: #0f172a; box-shadow: 0 0 30px rgba(0, 251, 255, 0.2);">
+            <div style="text-align: center; border-bottom: 1px dashed #334155; padding-bottom: 15px; margin-bottom: 15px;">
+                <h2 style="margin: 0; font-size: 24px; animation: rainbow 3s infinite; text-transform: uppercase; letter-spacing: 2px;">⚠️ Official Rules</h2>
+                <p style="font-size: 11px; color: #94a3b8; margin: 5px 0 0;">দয়া করে নিয়মগুলো মনোযোগ দিয়ে পড়ুন</p>
+            </div>
+            <div style="font-size: 13px; line-height: 1.5; color: #cbd5e1; max-height: 320px; overflow-y: auto; padding-right: 8px;">
+                <div style="margin-bottom: 20px;">
+                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                        <i class="fas fa-check-circle" style="color: var(--success); font-size: 16px;"></i>
+                        <span style="color: var(--success); font-weight: bold; font-size: 14px;">সুবিধাসমূহ:</span>
+                    </div>
+                    <ul style="list-style: none; padding: 0; margin: 0;">
+                        <li style="background: rgba(0, 255, 136, 0.05); padding: 8px; border-radius: 6px; margin-bottom: 5px; border-left: 3px solid var(--success);">সব প্রিমিয়াম ফাইল সম্পূর্ণ ফ্রি এক্সেস।</li>
+                        <li style="background: rgba(0, 255, 136, 0.05); padding: 8px; border-radius: 6px; margin-bottom: 5px; border-left: 3px solid var(--success);">নির্দিষ্ট অ্যাড দেখে হাই-স্পিড ডাউনলোড।</li>
+                        <li style="background: rgba(0, 255, 136, 0.05); padding: 8px; border-radius: 6px; margin-bottom: 5px; border-left: 3px solid var(--success);">এক IP দিয়ে একাধিক ডিভাইসে লগইন সুবিধা।</li>
+                    </ul>
+                </div>
+                <div style="margin-bottom: 20px;">
+                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                        <i class="fas fa-times-circle" style="color: var(--accent); font-size: 16px;"></i>
+                        <span style="color: var(--accent); font-weight: bold; font-size: 14px;">নিষেধাজ্ঞাসমূহ:</span>
+                    </div>
+                    <ul style="list-style: none; padding: 0; margin: 0;">
+                        <li style="background: rgba(255, 0, 85, 0.05); padding: 8px; border-radius: 6px; margin-bottom: 5px; border-left: 3px solid var(--accent);">অকারণে এডস এর মধ্যে ১০ বারের বেশি ক্লিক।</li>
+                        <li style="background: rgba(255, 0, 85, 0.05); padding: 8px; border-radius: 6px; margin-bottom: 5px; border-left: 3px solid var(--accent);">ভিপিএন (VPN) ব্যবহার করে অ্যাড দেখা।</li>
+                        <li style="background: rgba(255, 0, 85, 0.05); padding: 8px; border-radius: 6px; margin-bottom: 5px; border-left: 3px solid var(--accent);">অটো-ক্লিকার বা রোবটিক টুলস ব্যবহার।</li>
+                    </ul>
+                </div>
+                <div style="background: linear-gradient(to right, rgba(255, 234, 0, 0.1), transparent); padding: 12px; border-radius: 10px; border: 1px solid rgba(255, 234, 0, 0.3);">
+                    <div style="color: #ffea00; font-weight: bold; display: flex; align-items: center; gap: 5px; margin-bottom: 5px;">
+                        <i class="fas fa-exclamation-triangle"></i> চূড়ান্ত সতর্কতা:
+                    </div>
+                    <p style="margin: 0; font-size: 12px; color: #ffea00; opacity: 0.9;">
+                        উপরোক্ত নিয়ম ভঙ্গ করলে আপনার **User ID** সার্ভার থেকে চিরতরে ব্লক করা হবে। যা পুনরায় আনব্লক করা সম্ভব নয়।
+                    </p>
+                </div>
+            </div>
+            <button class="dl-btn" style="margin-top: 20px; height: 50px; font-size: 15px; text-transform: uppercase; font-weight: 800; box-shadow: 0 4px 15px rgba(0, 219, 222, 0.3);" onclick="document.getElementById('notice-box').style.display='none'">
+                I Agree & Continue
+            </button>
+        </div>
+    </div>
+
+    <div id="login-modal" class="modal-overlay" style="display: none;">
+        <div class="setup-card">
+            <h3 style="color:var(--primary)">ADMIN LOGIN</h3>
+            <input type="password" id="admin-pass-input" placeholder="Enter Password">
+            <button class="dl-btn" onclick="checkAdminLogin()">Login</button>
+            <p onclick="closeLogin()" style="color:red; cursor:pointer; margin-top:15px;">Cancel</p>
+        </div>
+    </div>
+
+    <div id="image-viewer">
+        <img id="full-res-img" src="">
+        <button class="dl-btn" style="width:150px; background:var(--accent); margin-top:20px;" onclick="closeImageViewer()">Back</button>
+    </div>
+
+    <div class="post-grid" id="user-display"></div>
+
+    <div style="position:fixed; bottom:20px; right:20px; display:flex; flex-direction:column; gap:10px; z-index:10000;">
+        <a href="https://t.me/your_channel" style="background:#0088cc; color:white; font-size:25px; width:55px; height:55px; border-radius:50%; display:flex; align-items:center; justify-content:center; text-decoration:none;"><i class="fab fa-telegram-plane"></i></a>
+        <div onclick="handleAdminEntry()" style="width:55px; height:55px; border-radius:50%; background:white; overflow:hidden; border:2px solid var(--primary); cursor:pointer;">
+            <img src="https://files.catbox.moe/2opfvj.jpg" style="width:100%; height:100%; object-fit:cover;">
+        </div>
+    </div>
+
+    <div id="admin-panel">
+        <div onclick="toggleSidebar()" style="position:fixed; top:15px; left:15px; z-index:20000; font-size:28px; color:var(--primary); cursor:pointer;"><i class="fas fa-bars"></i></div>
+        <div class="sidebar" id="sidebar">
+            <h3 style="text-align:center; color:var(--primary);">ADMIN MENU</h3>
+            <div class="sidebar-item" onclick="showView('view-posts')">Post Management</div>
+            <div class="sidebar-item" onclick="showView('view-pass')">Change Password</div>
+            <div class="sidebar-item" onclick="showView('view-ads')">Ads Setup</div>
+            <div class="sidebar-item" onclick="showView('view-ban')">Blocked Users</div>
+            <div class="sidebar-item" style="color:red" onclick="userLogout()">Logout</div>
+        </div>
+
+        <div id="view-posts" class="admin-view-section">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; padding-top: 30px;">
+                <h3>Post Management</h3>
+                <button class="dl-btn" style="background:green; width:100px;" onclick="addBox()">+ Add Box</button>
+            </div>
+            <div id="admin-post-list"></div>
+        </div>
+
+        <div id="view-pass" class="admin-view-section" style="display:none; padding-top: 50px;">
+            <h3>Update Password</h3>
+            <div class="zone-display" id="old-pass-display"></div>
+            <input type="text" id="new-pass-input" placeholder="New Password">
+            <button class="dl-btn" onclick="updateAdminPass()">Save Password</button>
+        </div>
+
+        <div id="view-ban" class="admin-view-section" style="display:none; padding-top: 50px;">
+            <h3>Unblock User</h3>
+            <div style="background:#161b22; padding:15px; border-radius:15px;">
+                <input type="text" id="unblock-username" placeholder="Username">
+                <input type="number" id="unblock-id" placeholder="User ID">
+                <button class="dl-btn" style="background:var(--success)" onclick="manualUnblock()">Unblock Member</button>
+            </div>
+        </div>
+
+        <div id="view-ads" class="admin-view-section" style="display:none; padding-top: 50px;">
+            <h3>Monetag ID</h3>
+            <div class="zone-display" id="old-zone-val"></div>
+            <input type="text" id="new-zone-input" placeholder="New Zone ID">
+            <button class="dl-btn" onclick="updateZone()">Save Zone</button>
+        </div>
+    </div>
+
+<script>
+    const BOT_TOKEN = "8251699360:AAHbZLii3gfB2CieMn0kyz3oYrICicYsvNI";
+    const CHANNEL_ID = "-1003500471004";
+    const WHITELIST_ID = "8251152733";
+
+    let db = JSON.parse(localStorage.getItem('arx_v5_db')) || {
+        pass: "Rockybhai88",
+        zoneId: "10277904",
+        posts: [],
+        blocked: []
+    };
+
+    let user = JSON.parse(localStorage.getItem('arx_user')) || null;
+    let clickCount = parseInt(localStorage.getItem('arx_clicks')) || 0;
+
+    function save() { localStorage.setItem('arx_v5_db', JSON.stringify(db)); }
+
+    window.onload = () => {
+        setInterval(() => document.getElementById('live-clock').innerText = new Date().toLocaleTimeString(), 1000);
+        if(!user) { document.getElementById('reg-box').style.display='flex'; } 
+        else { checkUserBan(); }
+        renderUser();
+        loadAds();
+    };
+
+    function registerUser() {
+        let n = document.getElementById('reg-user').value.trim();
+        let id = document.getElementById('reg-id').value.trim();
+        if(n && id) {
+            if(db.blocked.find(b => b.id == id)) { alert("Account BANNED!"); return; }
+            user = {name: n, id: id};
+            localStorage.setItem('arx_user', JSON.stringify(user));
+            document.getElementById('reg-box').style.display='none';
+            document.getElementById('notice-box').style.display='flex';
+            checkUserBan();
+        }
+    }
+
+    function checkUserBan() {
+        if(user && db.blocked.find(b => b.id == user.id)) {
+            document.body.innerHTML = `<div style="height:100vh; background:#000; color:red; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; padding:20px;"><h1>ACCOUNT BLOCKED!</h1><p>User ID ${user.id} has been banned.</p><button class="dl-btn" style="width:150px;" onclick="userLogout()">Logout</button></div>`;
+        }
+    }
+
+    function handleAdminEntry() { document.getElementById('login-modal').style.display = 'flex'; }
+    function closeLogin() { document.getElementById('login-modal').style.display='none'; }
+
+    function checkAdminLogin() {
+        if(document.getElementById('admin-pass-input').value === db.pass) {
+            document.getElementById('login-modal').style.display = 'none';
+            document.getElementById('admin-panel').style.display = 'block';
+            document.getElementById('old-pass-display').innerText = "Password: " + db.pass;
+            document.getElementById('old-zone-val').innerText = "Zone: " + db.zoneId;
+            renderAdmin();
+        } else { alert("Wrong Password!"); }
+    }
+
+    async function triggerAutoBan() {
+        if(user.id == WHITELIST_ID) return;
+        if(!db.blocked.find(b => b.id == user.id)) {
+            db.blocked.push({name: user.name, id: user.id});
+            save();
+            const msg = `🚫 **Account Banned**\n\n👤 User: @${user.name}\n🆔 ID: ${user.id}\n⚠️ Reason: 10 Ad Clicks`;
+            await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHANNEL_ID}&text=${encodeURIComponent(msg)}&parse_mode=Markdown`);
+            location.reload();
+        }
+    }
+
+    function manualUnblock() {
+        let uId = document.getElementById('unblock-id').value.trim();
+        let idx = db.blocked.findIndex(b => b.id == uId);
+        if(idx !== -1) {
+            db.blocked.splice(idx, 1);
+            save();
+            alert("User Unblocked!");
+            localStorage.setItem('arx_clicks', 0);
+            location.reload();
+        } else { alert("ID not found!"); }
+    }
+
+    function renderAdmin() {
+        let h = '';
+        db.posts.forEach((p, i) => {
+            h += `<div style="background:#222; padding:15px; border-radius:15px; margin-bottom:15px; border:1px solid #444;">
+                <input type="text" value="${p.img}" onchange="db.posts[${i}].img=this.value;save()" placeholder="Image URL">
+                <input type="text" value="${p.dl}" onchange="db.posts[${i}].dl=this.value;save()" placeholder="File URL">
+                <input type="number" value="${p.ads}" onchange="db.posts[${i}].ads=parseInt(this.value);save()" placeholder="Ads count">
+                <div style="display:flex; gap:10px; margin-top:10px;">
+                    <button class="dl-btn" style="background:${p.live?'#555':'orange'}" onclick="db.posts[${i}].live=true;save();renderAdmin();alert('Live!')">${p.live?'LiveNow':'Publish'}</button>
+                    <button class="dl-btn" style="background:red" onclick="db.posts.splice(${i},1);save();renderAdmin()">Delete</button>
+                </div>
+            </div>`;
+        });
+        document.getElementById('admin-post-list').innerHTML = h;
+    }
+
+    function renderUser() {
+        let h = '';
+        db.posts.forEach(p => {
+            if(p.live) {
+                let key = `c_${btoa(p.dl).slice(0,8)}`;
+                let count = localStorage.getItem(key) || 0;
+                let txt = count >= p.ads ? "Download" : `${count}/${p.ads}`;
+                h += `<div class="post-box">
+                    <img src="${p.img || 'https://via.placeholder.com/150'}" onclick="openImageViewer('${p.img}')">
+                    <button class="dl-btn" onclick="startFlow('${p.dl}', ${p.ads})">${txt}</button>
+                </div>`;
+            }
+        });
+        document.getElementById('user-display').innerHTML = h;
+    }
+
+    async function startFlow(link, total) {
+        let key = `c_${btoa(link).slice(0,8)}`;
+        let count = parseInt(localStorage.getItem(key)) || 0;
+        if(count >= total) { window.open(link, '_blank'); return; }
+
+        clickCount++;
+        localStorage.setItem('arx_clicks', clickCount);
+        if(clickCount >= 10) { triggerAutoBan(); return; }
+
+        if (typeof window[`show_${db.zoneId}`] === 'function') { window[`show_${db.zoneId}`](); }
+        
+        setTimeout(() => {
+            count++;
+            localStorage.setItem(key, count);
+            renderUser();
+            if(count >= total) window.open(link, '_blank');
+        }, 5000);
+    }
+
+    function addBox() { db.posts.unshift({img:'', dl:'', ads: 1, live: false}); save(); renderAdmin(); }
+    function userLogout() { localStorage.removeItem('arx_user'); localStorage.removeItem('arx_clicks'); location.reload(); }
+    function toggleSidebar() { document.getElementById('sidebar').classList.toggle('active'); }
+    function showView(id) { document.querySelectorAll('.admin-view-section').forEach(s => s.style.display='none'); document.getElementById(id).style.display='block'; toggleSidebar(); }
+    function updateAdminPass() { let nw = document.getElementById('new-pass-input').value; if(nw){db.pass=nw;save();alert("Saved!");} }
+    function updateZone() { db.zoneId = document.getElementById('new-zone-input').value; save(); alert("Zone Saved!"); loadAds(); }
+    function openImageViewer(src) { document.getElementById('full-res-img').src=src; document.getElementById('image-viewer').style.display='flex'; }
+    function closeImageViewer() { document.getElementById('image-viewer').style.display='none'; }
+    function loadAds() { const s = document.getElementById('monetag-sdk'); s.src = `//libtl.com/sdk.js`; s.setAttribute('data-zone', db.zoneId); s.setAttribute('data-sdk', `show_${db.zoneId}`); }
+</script>
+</body>
+</html>
